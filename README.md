@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/banner.png" alt="BAYREUTHWING — AI-Powered Code Vulnerability Scanner" width="100%">
+<img src="docs/images/Screenshot 2026-04-12 213615.png" alt="BAYREUTHWING — AI-Powered Code Vulnerability Scanner" width="100%">
 
 <br/>
 
