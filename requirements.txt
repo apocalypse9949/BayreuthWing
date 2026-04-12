@@ -1,0 +1,23 @@
+# BAYREUTHWING — AI Code Vulnerability Scanner
+# Core ML
+torch>=2.0.0
+numpy>=1.24.0
+
+# CLI & Display
+rich>=13.0.0
+click>=8.1.0
+colorama>=0.4.6
+
+# Configuration
+pyyaml>=6.0
+
+# Report Generation
+jinja2>=3.1.0
+markupsafe>=2.1.0
+
+# Pattern Matching
+regex>=2023.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0

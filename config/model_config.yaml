@@ -1,0 +1,174 @@
+# ═══════════════════════════════════════════════════════════
+# BAYREUTHWING — Model & Scanner Configuration
+# ═══════════════════════════════════════════════════════════
+
+model:
+  name: "CodeTransformer"
+  version: "1.0.0"
+
+  # Architecture
+  vocab_size: 32000
+  max_seq_length: 2048
+  embedding_dim: 512
+  num_heads: 8
+  num_layers: 6
+  feedforward_dim: 2048
+  dropout: 0.1
+  num_vulnerability_classes: 11
+  activation: "gelu"
+
+  # Token types
+  token_types:
+    - keyword
+    - identifier
+    - literal
+    - operator
+    - delimiter
+    - comment
+    - string
+    - number
+    - whitespace
+    - unknown
+
+training:
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  warmup_steps: 500
+  max_grad_norm: 1.0
+  mixed_precision: true
+  early_stopping_patience: 5
+  checkpoint_dir: "checkpoints"
+  log_interval: 10
+
+  # Data
+  synthetic_samples: 5000
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+scanner:
+  # Analysis modules (multi-agent architecture)
+  modules:
+    code_analysis:
+      enabled: true
+      description: "Analyzes code for vulnerability patterns"
+    dependency_analysis:
+      enabled: true
+      description: "Examines imports and third-party dependencies"
+    architecture_analysis:
+      enabled: true
+      description: "Evaluates system architecture and data flow"
+    threat_modeling:
+      enabled: true
+      description: "Models potential attack surfaces and threat vectors"
+
+  # Scanning parameters
+  confidence_threshold: 0.5
+  max_file_size_kb: 5120
+  recursive: true
+  parallel_workers: 4
+
+  # Adaptive intelligence
+  adaptive:
+    auto_detect_framework: true
+    auto_detect_language: true
+    adjust_rules_by_context: true
+
+  # Supported languages
+  languages:
+    - python
+    - javascript
+    - java
+    - c
+    - cpp
+    - php
+    - ruby
+    - go
+    - rust
+
+  # File extensions
+  extensions:
+    python: [".py"]
+    javascript: [".js", ".jsx", ".ts", ".tsx"]
+    java: [".java"]
+    c: [".c", ".h"]
+    cpp: [".cpp", ".hpp", ".cc", ".cxx"]
+    php: [".php"]
+    ruby: [".rb"]
+    go: [".go"]
+    rust: [".rs"]
+
+  # Severity scoring weights
+  severity:
+    critical_threshold: 0.9
+    high_threshold: 0.7
+    medium_threshold: 0.5
+    low_threshold: 0.3
+
+report:
+  formats: ["console", "json", "html"]
+  default_format: "console"
+  include_code_snippets: true
+  include_recommendations: true
+  include_cwe_mapping: true
+  include_owasp_mapping: true
+  max_findings_per_file: 50
+
+vulnerability_classes:
+  0:
+    name: "SQL Injection"
+    cwe: "CWE-89"
+    owasp: "A03:2021"
+    severity_base: "critical"
+  1:
+    name: "Cross-Site Scripting (XSS)"
+    cwe: "CWE-79"
+    owasp: "A03:2021"
+    severity_base: "high"
+  2:
+    name: "Command Injection"
+    cwe: "CWE-78"
+    owasp: "A03:2021"
+    severity_base: "critical"
+  3:
+    name: "Path Traversal"
+    cwe: "CWE-22"
+    owasp: "A01:2021"
+    severity_base: "high"
+  4:
+    name: "Hardcoded Credentials"
+    cwe: "CWE-798"
+    owasp: "A07:2021"
+    severity_base: "high"
+  5:
+    name: "Insecure Deserialization"
+    cwe: "CWE-502"
+    owasp: "A08:2021"
+    severity_base: "critical"
+  6:
+    name: "Weak Cryptography"
+    cwe: "CWE-327"
+    owasp: "A02:2021"
+    severity_base: "medium"
+  7:
+    name: "Buffer Overflow"
+    cwe: "CWE-120"
+    owasp: "A06:2021"
+    severity_base: "critical"
+  8:
+    name: "Server-Side Request Forgery"
+    cwe: "CWE-918"
+    owasp: "A10:2021"
+    severity_base: "high"
+  9:
+    name: "Sensitive Data Exposure"
+    cwe: "CWE-200"
+    owasp: "A02:2021"
+    severity_base: "high"
+  10:
+    name: "Insecure Randomness"
+    cwe: "CWE-330"
+    owasp: "A02:2021"
+    severity_base: "medium"
