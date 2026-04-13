@@ -11,6 +11,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .embeddings import RotaryPositionalEmbedding, apply_rotary_pos_emb
 
 
 class MultiHeadSelfAttention(nn.Module):
@@ -45,6 +46,9 @@ class MultiHeadSelfAttention(nn.Module):
 
         self.dropout = nn.Dropout(p=dropout)
         self.scale = math.sqrt(self.d_k)
+
+        # RoPE
+        self.rope = RotaryPositionalEmbedding(self.d_k)
 
         self._init_weights()
 
@@ -86,18 +90,37 @@ class MultiHeadSelfAttention(nn.Module):
         K = K.view(batch_size, seq_len, self.num_heads, self.d_k).transpose(1, 2)
         V = V.view(batch_size, seq_len, self.num_heads, self.d_k).transpose(1, 2)
 
-        # Scaled dot-product attention
-        scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
+        # Apply RoPE
+        cos, sin = self.rope(Q, seq_len)
+        Q, K = apply_rotary_pos_emb(Q, K, cos, sin)
 
-        # Apply mask if provided
+        # Scaled dot-product attention using optimized PyTorch SDPA
+        # SDPA expects mask where True means participate in attention.
+        # Our mask is 1 for padding (ignore), 0 for valid.
+        attn_mask = None
         if mask is not None:
-            scores = scores.masked_fill(mask == 1, float("-inf"))
+            # PyTorch SDPA expects boolean mask where True = keep, False = ignore
+            attn_mask = (mask == 0)
 
-        attention_weights = F.softmax(scores, dim=-1)
-        attention_weights = self.dropout(attention_weights)
-
-        # Weighted sum of values
-        context = torch.matmul(attention_weights, V)
+        # Check if we need to return attention weights
+        if return_attention:
+            # Fall back to manual computation if attention weights are needed
+            # (SDPA doesn't return attention weights in older PyTorch versions)
+            scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
+            if mask is not None:
+                scores = scores.masked_fill(mask == 1, float("-inf"))
+            attention_weights = F.softmax(scores, dim=-1)
+            attention_weights_dropped = self.dropout(attention_weights)
+            context = torch.matmul(attention_weights_dropped, V)
+        else:
+            # Optimized path
+            context = F.scaled_dot_product_attention(
+                Q, K, V,
+                attn_mask=attn_mask,
+                dropout_p=self.dropout.p if self.training else 0.0,
+                is_causal=False
+            )
+            attention_weights = None
 
         # Concatenate heads and project
         context = (
@@ -174,6 +197,9 @@ class VulnerabilityAttention(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
         self.scale = math.sqrt(self.d_k)
 
+        # RoPE
+        self.rope = RotaryPositionalEmbedding(self.d_k)
+
         self._init_weights()
 
     def _init_weights(self):
@@ -216,18 +242,25 @@ class VulnerabilityAttention(nn.Module):
         V = V.view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
 
         # Cross-attention scores
-        scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
-
-        # Apply mask if provided (mask padding tokens)
+        attn_mask = None
         if mask is not None:
-            # mask shape: (batch, 1, 1, seq_len)
-            scores = scores.masked_fill(mask == 1, float("-inf"))
+            attn_mask = (mask == 0)
 
-        attention_weights = F.softmax(scores, dim=-1)
-        attention_weights = self.dropout(attention_weights)
-
-        # Weighted sum of code representations
-        context = torch.matmul(attention_weights, V)
+        if return_attention:
+            scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
+            if mask is not None:
+                scores = scores.masked_fill(mask == 1, float("-inf"))
+            attention_weights = F.softmax(scores, dim=-1)
+            attention_weights_dropped = self.dropout(attention_weights)
+            context = torch.matmul(attention_weights_dropped, V)
+        else:
+            context = F.scaled_dot_product_attention(
+                Q, K, V,
+                attn_mask=attn_mask,
+                dropout_p=self.dropout.p if self.training else 0.0,
+                is_causal=False
+            )
+            attention_weights = None
 
         # Concatenate heads
         context = (
