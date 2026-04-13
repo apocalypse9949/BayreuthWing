@@ -587,6 +587,38 @@ class RuleEngine:
         ]
         rules.extend(random_rules)
 
+
+
+
+        # ADVANCED SECRET SCANNING RULES
+        auth_rules_extra = [
+            Rule("AUT005", 4,
+                 r"(?i)AKIA[0-9A-Z]{16}",
+                 "AWS Access Key ID detected",
+                 "critical", None, 0.95),
+            Rule("AUT006", 4,
+                 r"(?i)ya29\.[0-9a-zA-Z-_]+",
+                 "Google OAuth Access Token detected",
+                 "critical", None, 0.95),
+            Rule("AUT007", 4,
+                 r"(?i)gh[po]_[a-zA-Z0-9]{36}",
+                 "GitHub Personal Access Token detected",
+                 "critical", None, 0.95),
+            Rule("AUT008", 4,
+                 r"(?i)sk_live_[a-zA-Z0-9]{24}",
+                 "Stripe Live Secret Key detected",
+                 "critical", None, 0.95),
+            Rule("AUT009", 4,
+                 r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
+                 "Private Cryptographic Key detected in code",
+                 "critical", None, 0.99),
+            Rule("AUT010", 4,
+                 r"(?i)(?:api[_-]?key|slack[_-]?token|bot[_-]?token|auth[_-]?token)\s*(?:=|:)\s*['\"][a-zA-Z0-9\-_\\.]{15,}['\"]",
+                 "High-entropy secret/token assignment detected",
+                 "high", None, 0.85),
+        ]
+        rules.extend(auth_rules_extra)
+
         return rules
 
     @property

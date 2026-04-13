@@ -59,6 +59,72 @@ class SinusoidalPositionalEncoding(nn.Module):
         return self.dropout(x)
 
 
+
+class RotaryPositionalEmbedding(nn.Module):
+    """
+    Rotary Positional Embedding (RoPE) as described in RoFormer (Su et al.).
+
+    RoPE applies positional information at the self-attention layer by rotating
+    the query and key representations. This provides better extrapolation
+    to longer sequence lengths than standard sinusoidal embeddings.
+    """
+
+    def __init__(self, d_model: int, max_len: int = 2048, base: int = 10000):
+        super().__init__()
+        self.d_model = d_model
+
+        # RoPE is applied to each head independently, so we assume d_model
+        # here is actually d_head (d_model // num_heads) in practice, but
+        # for flexibility we create it for the full d_model dimension
+        # and it will be broadcasted correctly if used per-head.
+        # Actually, in standard implementation, RoPE is applied per-head.
+
+        # Precompute frequencies
+        inv_freq = 1.0 / (base ** (torch.arange(0, d_model, 2).float() / d_model))
+        self.register_buffer("inv_freq", inv_freq)
+
+        # Precompute the cos and sin cache up to max_len
+        self.max_len = max_len
+        self._build_cache(max_len)
+
+    def _build_cache(self, seq_len: int):
+        t = torch.arange(seq_len, device=self.inv_freq.device, dtype=self.inv_freq.dtype)
+        freqs = torch.outer(t, self.inv_freq)
+        # Different from paper: we use polar formulation
+        emb = torch.cat((freqs, freqs), dim=-1)
+        self.register_buffer("cos_cached", emb.cos()[None, None, :, :])
+        self.register_buffer("sin_cached", emb.sin()[None, None, :, :])
+
+    def forward(self, x: torch.Tensor, seq_len: int) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns cos and sin for rotary embeddings.
+        x: Input tensor, just for device and dtype.
+        seq_len: Sequence length to get embeddings for.
+        """
+        if seq_len > self.max_len:
+            self._build_cache(seq_len)
+            self.max_len = seq_len
+
+        return (
+            self.cos_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
+            self.sin_cached[:, :, :seq_len, ...].to(dtype=x.dtype)
+        )
+
+def apply_rotary_pos_emb(q: torch.Tensor, k: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Apply rotary positional embeddings to queries and keys.
+    q, k: (batch_size, num_heads, seq_len, d_head)
+    cos, sin: (1, 1, seq_len, d_head)
+    """
+    def rotate_half(x):
+        x1, x2 = x[..., : x.shape[-1] // 2], x[..., x.shape[-1] // 2 :]
+        return torch.cat((-x2, x1), dim=-1)
+
+    q_embed = (q * cos) + (rotate_half(q) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    return q_embed, k_embed
+
+
 class TokenTypeEmbedding(nn.Module):
     """
     Learned token-type embeddings for code tokens.
@@ -148,10 +214,16 @@ class CodeEmbedding(nn.Module):
             vocab_size, d_model, padding_idx=padding_idx
         )
 
-        # Positional encoding (sinusoidal, fixed)
-        self.positional_encoding = SinusoidalPositionalEncoding(
-            d_model=d_model, max_len=max_len, dropout=0.0  # dropout applied later
-        )
+        # We now use RoPE at the attention layer, but we keep sinusoidal
+        # or remove it. Let's keep it but make it optional, or just remove it.
+        # The prompt says "Replace or supplement". Let's supplement by keeping it,
+        # or replacing it. I'll replace it.
+
+        self.use_rope = True
+        if not self.use_rope:
+            self.positional_encoding = SinusoidalPositionalEncoding(
+                d_model=d_model, max_len=max_len, dropout=0.0
+            )
 
         # Token type embedding (learned)
         self.token_type_embedding = TokenTypeEmbedding(d_model=d_model)
@@ -194,8 +266,9 @@ class CodeEmbedding(nn.Module):
         # Token embeddings (scaled)
         x = self.token_embedding(input_ids) * self.scale
 
-        # Add positional encoding
-        x = self.positional_encoding(x)
+        # Add positional encoding if not using RoPE
+        if not getattr(self, 'use_rope', False) and hasattr(self, 'positional_encoding'):
+            x = self.positional_encoding(x)
 
         # Add token type embeddings if provided
         if token_type_ids is not None:
