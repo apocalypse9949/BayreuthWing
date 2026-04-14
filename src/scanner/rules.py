@@ -43,18 +43,30 @@ class Rule:
             return []
 
         findings = []
-        for match in self.pattern.finditer(code):
-            line_num = code[:match.start()].count("\n") + 1
-            findings.append({
-                "rule_id": self.rule_id,
-                "vuln_class": self.vuln_class,
-                "line": line_num,
-                "matched_text": match.group(0)[:200],  # Truncate long matches
-                "message": self.message,
-                "severity": self.severity,
-                "confidence": self.confidence,
-                "source": "static_rule",
-            })
+        matches = list(self.pattern.finditer(code))
+
+        if matches:
+            # ⚡ Bolt Optimization:
+            # Replaced O(N^2) line counting (re-slicing from start for every match)
+            # with an incremental O(N) line counter that only counts newlines
+            # between the current and previous match index.
+            last_idx = 0
+            current_line = 1
+            for match in matches:
+                idx = match.start()
+                current_line += code.count("\n", last_idx, idx)
+                last_idx = idx
+
+                findings.append({
+                    "rule_id": self.rule_id,
+                    "vuln_class": self.vuln_class,
+                    "line": current_line,
+                    "matched_text": match.group(0)[:200],  # Truncate long matches
+                    "message": self.message,
+                    "severity": self.severity,
+                    "confidence": self.confidence,
+                    "source": "static_rule",
+                })
 
         return findings
 

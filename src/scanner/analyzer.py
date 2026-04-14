@@ -148,13 +148,22 @@ class CodeAnalyzer:
             patterns = []
 
         for pattern, message in patterns:
-            for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
-                imports.append({
-                    "line": line,
-                    "import": match.group(0),
-                    "message": message,
-                })
+            matches = list(re.finditer(pattern, code))
+            if matches:
+                # ⚡ Bolt Optimization:
+                # O(N) incremental line counting replaces full string slice/re-scan for each match
+                last_idx = 0
+                current_line = 1
+                for match in matches:
+                    idx = match.start()
+                    current_line += code.count("\n", last_idx, idx)
+                    last_idx = idx
+
+                    imports.append({
+                        "line": current_line,
+                        "import": match.group(0),
+                        "message": message,
+                    })
 
         return imports
 
@@ -167,15 +176,24 @@ class CodeAnalyzer:
             # Escape dots for regex
             escaped = re.escape(func_name)
             pattern = rf"\b{escaped}\s*\("
-            for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
-                findings.append({
-                    "function": func_name,
-                    "line": line,
-                    "vuln_class": info["vuln_class"],
-                    "severity": info["severity"],
-                    "message": info["msg"],
-                })
+            matches = list(re.finditer(pattern, code))
+            if matches:
+                # ⚡ Bolt Optimization:
+                # O(N) incremental line counting replaces full string slice/re-scan for each match
+                last_idx = 0
+                current_line = 1
+                for match in matches:
+                    idx = match.start()
+                    current_line += code.count("\n", last_idx, idx)
+                    last_idx = idx
+
+                    findings.append({
+                        "function": func_name,
+                        "line": current_line,
+                        "vuln_class": info["vuln_class"],
+                        "severity": info["severity"],
+                        "message": info["msg"],
+                    })
 
         return findings
 
@@ -302,14 +320,23 @@ class CodeAnalyzer:
 
         if has_sources:
             for sink_pattern, vuln_class, message in lang_sinks:
-                for match in re.finditer(sink_pattern, code):
-                    line = code[:match.start()].count("\n") + 1
-                    risks.append({
-                        "vuln_class": vuln_class,
-                        "line": line,
-                        "message": message,
-                        "severity": "medium",
-                        "sink": match.group(0),
-                    })
+                matches = list(re.finditer(sink_pattern, code))
+                if matches:
+                    # ⚡ Bolt Optimization:
+                    # O(N) incremental line counting replaces full string slice/re-scan for each match
+                    last_idx = 0
+                    current_line = 1
+                    for match in matches:
+                        idx = match.start()
+                        current_line += code.count("\n", last_idx, idx)
+                        last_idx = idx
+
+                        risks.append({
+                            "vuln_class": vuln_class,
+                            "line": current_line,
+                            "message": message,
+                            "severity": "medium",
+                            "sink": match.group(0),
+                        })
 
         return risks
