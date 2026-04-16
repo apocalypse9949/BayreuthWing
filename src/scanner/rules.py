@@ -43,12 +43,17 @@ class Rule:
             return []
 
         findings = []
+        last_idx = 0
+        current_line = 1
         for match in self.pattern.finditer(code):
-            line_num = code[:match.start()].count("\n") + 1
+            start_idx = match.start()
+            current_line += code.count("\n", last_idx, start_idx)
+            last_idx = start_idx
+
             findings.append({
                 "rule_id": self.rule_id,
                 "vuln_class": self.vuln_class,
-                "line": line_num,
+                "line": current_line,
                 "matched_text": match.group(0)[:200],  # Truncate long matches
                 "message": self.message,
                 "severity": self.severity,
