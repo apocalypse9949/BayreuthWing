@@ -1,0 +1,4 @@
+## 2024-05-24 - HTML Report Generation XSS Vulnerability
+**Vulnerability:** Cross-Site Scripting (XSS) in the HTML report generator (`src/scanner/reporter.py`). The application was embedding unfiltered data (from the codebase being scanned, such as file paths, vulnerability names, and matched source code) directly into the generated HTML file using string formatting.
+**Learning:** This codebase generates HTML reports using basic Python string formatting without a templating engine (like Jinja2) that provides automatic escaping. This means all user-controlled or codebase-derived data must be explicitly escaped, otherwise scanning maliciously crafted files could lead to script execution when a user opens the generated report.
+**Prevention:** Always use `html.escape()` when rendering user-provided or scanned data directly into an HTML string, or switch to a proper HTML templating engine that handles context-aware escaping automatically.

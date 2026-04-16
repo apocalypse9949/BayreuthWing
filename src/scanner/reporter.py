@@ -7,6 +7,7 @@ Generates scan reports in multiple formats:
 - HTML (styled, interactive)
 """
 
+import html as html_mod
 import json
 import os
 from datetime import datetime
@@ -199,26 +200,37 @@ class ReportGenerator:
         findings_html = ""
         for i, f in enumerate(findings):
             color = self.SEVERITY_COLORS.get(f["severity"], "#666")
+
+            # Escape all user/codebase-provided input to prevent XSS in HTML reports
+            safe_vuln_name = html_mod.escape(f.get("vulnerability_name", ""))
+            safe_message = html_mod.escape(f.get("message", ""))
+            safe_filepath = html_mod.escape(f.get("filepath", ""))
+            safe_matched = html_mod.escape(f.get("matched_text", "")[:200]) if f.get("matched_text") else ""
+
+            safe_remediation = []
+            if f.get("remediation"):
+                safe_remediation = [html_mod.escape(r) for r in f.get("remediation", [])[:3]]
+
             findings_html += f"""
             <div class="finding" style="border-left: 4px solid {color};">
                 <div class="finding-header">
                     <span class="severity-badge" style="background: {color};">
                         {f['severity'].upper()}
                     </span>
-                    <span class="vuln-name">{f['vulnerability_name']}</span>
+                    <span class="vuln-name">{safe_vuln_name}</span>
                     <span class="confidence">{f['confidence']:.0%} confidence</span>
                 </div>
                 <div class="finding-body">
-                    <p class="message">{f['message']}</p>
+                    <p class="message">{safe_message}</p>
                     <div class="details">
-                        <span>📄 {f['filepath']}</span>
+                        <span>📄 {safe_filepath}</span>
                         <span>📍 Line {f.get('line', '?')}</span>
                         <span>🏷️ {f['cwe_id']}</span>
                         <span>📋 {f['owasp']}</span>
                         <span>🔍 {f['source']}</span>
                     </div>
-                    {"<div class='matched-code'><code>" + f['matched_text'][:200] + "</code></div>" if f.get('matched_text') else ""}
-                    {"<div class='remediation'><strong>Remediation:</strong><ul>" + "".join(f"<li>{r}</li>" for r in f.get('remediation', [])[:3]) + "</ul></div>" if f.get('remediation') else ""}
+                    {"<div class='matched-code'><code>" + safe_matched + "</code></div>" if safe_matched else ""}
+                    {"<div class='remediation'><strong>Remediation:</strong><ul>" + "".join(f"<li>{r}</li>" for r in safe_remediation) + "</ul></div>" if safe_remediation else ""}
                 </div>
             </div>
             """
@@ -226,11 +238,12 @@ class ReportGenerator:
         # Build vuln chart data
         chart_items = ""
         for name, count in sorted(vuln_counts.items(), key=lambda x: -x[1]):
+            safe_chart_name = html_mod.escape(name)
             max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
             chart_items += f"""
             <div class="chart-row">
-                <span class="chart-label">{name}</span>
+                <span class="chart-label">{safe_chart_name}</span>
                 <div class="chart-bar-container">
                     <div class="chart-bar" style="width: {width}%;"></div>
                 </div>
@@ -523,7 +536,7 @@ class ReportGenerator:
             <div class="info-card">
                 <div class="label">Target</div>
                 <div class="value" style="font-size: 1rem; word-break: break-all;">
-                    {results.get('target', 'Unknown')}
+                    {html_mod.escape(results.get('target', 'Unknown'))}
                 </div>
             </div>
             <div class="info-card">
