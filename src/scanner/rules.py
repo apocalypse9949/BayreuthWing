@@ -43,8 +43,15 @@ class Rule:
             return []
 
         findings = []
+        # Optimization: Track line numbers incrementally to avoid O(N^2) string slicing on large files
+        line_num = 1
+        last_idx = 0
+
         for match in self.pattern.finditer(code):
-            line_num = code[:match.start()].count("\n") + 1
+            match_start = match.start()
+            line_num += code.count("\n", last_idx, match_start)
+            last_idx = match_start
+
             findings.append({
                 "rule_id": self.rule_id,
                 "vuln_class": self.vuln_class,
