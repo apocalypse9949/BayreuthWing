@@ -22,7 +22,10 @@ Architecture:
 
 import os
 import time
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 from typing import Optional
 from pathlib import Path
 
@@ -137,6 +140,8 @@ class ScanEngine:
 
         # Code flow analyzer
         self.code_analyzer = CodeAnalyzer()
+        from .reversing.analyzer import ReverseEngineeringAnalyzer
+        self.reverse_engineering_analyzer = ReverseEngineeringAnalyzer()
 
         # Configuration
         self.confidence_threshold = scanner_cfg.get("confidence_threshold", 0.5)
@@ -197,6 +202,12 @@ class ScanEngine:
         if self.enable_flow:
             flow_findings = self._flow_scan(code, filepath)
             findings.extend(flow_findings)
+
+
+        # ── Module 4: Reverse Engineering ───────────────────
+        if hasattr(self, 'reverse_engineering_analyzer'):
+            rev_findings = self._reversing_scan(code, filepath, language)
+            findings.extend(rev_findings)
 
         # ── Merge & Deduplicate ─────────────────────────────
         findings = self._merge_findings(findings)
@@ -352,6 +363,26 @@ class ScanEngine:
                 source=ff.get("source", "code_analysis"),
             ))
 
+        return findings
+
+
+    def _reversing_scan(self, code: str, filepath: str, language: str) -> list[Finding]:
+        """Run reverse engineering analysis."""
+        findings = []
+        try:
+            results = self.reverse_engineering_analyzer.analyze(code, filepath, language)
+            for rf in results:
+                findings.append(Finding(
+                    vuln_class=rf.get("vuln_class", 9),
+                    filepath=filepath,
+                    line=rf.get("line", 0),
+                    message=rf.get("message", "Reverse engineering issue found"),
+                    severity=rf.get("severity", "medium"),
+                    confidence=rf.get("confidence", 0.6),
+                    source=rf.get("source", "reverse_engineering"),
+                ))
+        except Exception as e:
+            self.logger.error(f"Error in reverse engineering scan for {filepath}: {e}")
         return findings
 
     def _merge_findings(self, findings: list[Finding]) -> list[Finding]:
