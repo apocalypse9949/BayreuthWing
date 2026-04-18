@@ -20,9 +20,13 @@ class EndpointDiscoverer:
         ]
 
         for pattern in route_patterns:
+            last_idx = 0
+            current_line = 1
             for match in re.finditer(pattern, code):
                 endpoint = match.group(1)
-                line = code[:match.start()].count("\n") + 1
+                current_line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
+                line = current_line
 
                 # Check for potentially sensitive endpoints
                 if "admin" in endpoint.lower() or "internal" in endpoint.lower() or "debug" in endpoint.lower():
