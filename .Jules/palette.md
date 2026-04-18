@@ -1,0 +1,3 @@
+## 2026-04-18 - HTML Report Charts Accessibility
+**Learning:** Custom UI components like bar charts generated in raw HTML string outputs (e.g. `src/scanner/reporter.py`) often lack native semantic meaning. Without ARIA roles like `progressbar` and associated labels, screen readers just interpret them as empty, meaningless `div` elements, severely limiting the accessibility of the generated artifacts.
+**Action:** Always ensure that dynamically generated custom data visualization components in HTML reports include appropriate ARIA roles (`role="progressbar"`), state properties (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`), and accessible labels (`aria-labelledby`).
