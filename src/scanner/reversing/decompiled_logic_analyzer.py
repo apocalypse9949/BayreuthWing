@@ -20,8 +20,13 @@ class DecompiledLogicAnalyzer:
         ]
 
         for pattern, message in patterns:
+             # [PERFORMANCE] Use incremental counting to prevent O(N^2) DoS on large files
+             last_idx = 0
+             current_line = 1
              for match in re.finditer(pattern, code):
-                 line = code[:match.start()].count("\n") + 1
+                 current_line += code.count("\n", last_idx, match.start())
+                 last_idx = match.start()
+                 line = current_line
                  # Add specific logic here if it's too noisy, but for this mock we just add it
                  findings.append({
                      "vuln_class": 6, # Weak cryptography/general logic flaw

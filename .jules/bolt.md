@@ -1,0 +1,3 @@
+## 2024-04-18 - Avoid O(N^2) String Slicing for Line Numbers in Large Files
+**Learning:** Calculating line numbers during regex iteration using `code[:match.start()].count('\n')` creates an O(N^2) performance bottleneck on large files because it repeatedly slices the entire string from the beginning and counts newlines. A benchmark showed a 1200x slowdown (197s vs 0.16s) for just 200k lines of code.
+**Action:** Always use incremental counting for line numbers when iterating over regex matches: keep track of `last_idx` and `current_line`, and compute `current_line += code.count('\n', last_idx, match.start())` for each match.

@@ -315,10 +315,15 @@ class CodePreprocessor:
             return functions
 
         lines = code.split("\n")
+        # [PERFORMANCE] Use incremental counting to prevent O(N^2) DoS on large files
+        last_idx = 0
+        current_line = 1
         for match in re.finditer(pattern, code, re.DOTALL):
             name = next((g for g in match.groups() if g), "unknown")
             start_pos = match.start()
-            start_line = code[:start_pos].count("\n") + 1
+            current_line += code.count("\n", last_idx, start_pos)
+            last_idx = start_pos
+            start_line = current_line
 
             functions.append({
                 "name": name,
