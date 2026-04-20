@@ -1,5 +1,5 @@
 """
-BAYREUTHWING — Hybrid Scan Engine v2.0 (Mythos-Class)
+BAYREUTHWING — Hybrid Scan Engine v2.0
 
 The core orchestrator that combines ML inference, static rules, code flow
 analysis, dynamic rules, MiroFish scenario execution, cognitive reasoning,
@@ -117,7 +117,7 @@ class Finding:
 
 class ScanEngine:
     """
-    Mythos-Class multi-agent hybrid scanning engine.
+    Multi-agent hybrid scanning engine.
 
     Combines eight analysis modules into a unified, self-improving pipeline:
     1. ML Inference — CodeTransformer 100M-parameter predictions
@@ -849,22 +849,22 @@ class ScanEngine:
         """Generate a comprehensive intelligence report from all engines."""
         lines = [
             "",
-            "  ╔══════════════════════════════════════════════════════════════════╗",
-            "  ║              BAYREUTHWING v2.0 — Intelligence Report            ║",
-            "  ║                     [ MYTHOS-CLASS ENGINE ]                     ║",
-            "  ╚══════════════════════════════════════════════════════════════════╝",
+            "  +==================================================================+",
+            "  |              BAYREUTHWING v2.0 -- Intelligence Report            |",
+            "  |                   [ AUTONOMOUS INTELLIGENCE ]                    |",
+            "  +==================================================================+",
             "",
             "  ACTIVE MODULES:",
-            f"    ML Inference (100M params):  {'✓ ACTIVE' if self.enable_ml else '✗ Inactive'}",
-            f"    Static Rules:               {'✓ ACTIVE' if self.enable_rules else '✗ Inactive'}",
-            f"    Code Flow Analysis:          {'✓ ACTIVE' if self.enable_flow else '✗ Inactive'}",
-            f"    Reverse Engineering:         ✓ ACTIVE",
-            f"    Dynamic Rules:              {'✓ ACTIVE' if self.dynamic_rules_engine else '✗ Inactive'}",
-            f"    MiroFish Deep Scan:          {'✓ ACTIVE' if self.enable_deep_scan else '✗ Inactive'}",
-            f"    Cognitive Reasoning:         {'✓ ACTIVE' if self.enable_cognitive else '✗ Inactive'}",
-            f"    Adversarial Simulation:      {'✓ ACTIVE' if self.enable_adversarial else '✗ Inactive'}",
-            f"    Self-Evolution:             {'✓ ACTIVE' if self.enable_evolution else '✗ Inactive'}",
-            f"    Internet Discovery:          {'✓ ACTIVE' if self.enable_discovery else '✗ Inactive'}",
+            f"    ML Inference (100M params):  {'[+] ACTIVE' if self.enable_ml else '[-] Inactive'}",
+            f"    Static Rules:               {'[+] ACTIVE' if self.enable_rules else '[-] Inactive'}",
+            f"    Code Flow Analysis:          {'[+] ACTIVE' if self.enable_flow else '[-] Inactive'}",
+            f"    Reverse Engineering:         [+] ACTIVE",
+            f"    Dynamic Rules:              {'[+] ACTIVE' if self.dynamic_rules_engine else '[-] Inactive'}",
+            f"    MiroFish Deep Scan:          {'[+] ACTIVE' if self.enable_deep_scan else '[-] Inactive'}",
+            f"    Cognitive Reasoning:         {'[+] ACTIVE' if self.enable_cognitive else '[-] Inactive'}",
+            f"    Adversarial Simulation:      {'[+] ACTIVE' if self.enable_adversarial else '[-] Inactive'}",
+            f"    Self-Evolution:             {'[+] ACTIVE' if self.enable_evolution else '[-] Inactive'}",
+            f"    Internet Discovery:          {'[+] ACTIVE' if self.enable_discovery else '[-] Inactive'}",
             "",
         ]
 

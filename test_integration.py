@@ -1,4 +1,4 @@
-"""Quick integration test of all Mythos-class engines."""
+"""Quick integration test of all BayreuthWing engines."""
 
 # Test 1: Adversarial Simulation
 print("=" * 60)

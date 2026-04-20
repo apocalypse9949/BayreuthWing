@@ -4,7 +4,7 @@
 
 <br/>
 
-# BAYREUTHWING v2.0 — Mythos-Class Engine
+# BAYREUTHWING v2.0 — Autonomous Security Intelligence
 
 **An autonomous, self-evolving security intelligence platform that thinks like an attacker.**
 
@@ -29,7 +29,7 @@ BAYREUTHWING combines a 100M-parameter CodeTransformer neural network with 10 sp
 ## Table of Contents
 
 - [Overview](#overview)
-- [What Makes This Mythos-Class](#what-makes-this-mythos-class)
+- [What Makes This Different](#what-makes-this-different)
 - [Architecture](#architecture)
 - [The 10 Analysis Engines](#the-10-analysis-engines)
 - [Vulnerability Coverage](#vulnerability-coverage)
@@ -60,7 +60,7 @@ The system operates as a **10-engine multi-agent architecture** where specialize
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                      BAYREUTHWING v2.0 — MYTHOS-CLASS                      │
+│                    BAYREUTHWING v2.0 — INTELLIGENCE ENGINE                 │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐         │
@@ -98,7 +98,7 @@ The system operates as a **10-engine multi-agent architecture** where specialize
 
 ---
 
-## What Makes This Mythos-Class
+## What Makes This Different
 
 | Capability | Traditional SAST | ML Scanners | **BAYREUTHWING v2.0** |
 |---|---|---|---|
@@ -249,7 +249,7 @@ BayreuthWing/
 │   │   ├── embeddings.py         # Positional + token-type embeddings
 │   │   └── tokenizer.py          # Code-aware tokenizer
 │   ├── scanner/
-│   │   ├── engine.py             # Mythos-class 10-engine orchestrator
+│   │   ├── engine.py             # 10-engine orchestrator
 │   │   ├── rules.py              # 200+ static analysis rules
 │   │   ├── analyzer.py           # Code flow analysis
 │   │   ├── dynamic_rules.py      # Hot-loadable self-tuning rules
@@ -315,7 +315,7 @@ python cli.py scan /path/to/file.py
 
 ### Deep Scan (MiroFish + All Engines)
 ```bash
-# Enable full Mythos-class analysis
+# Enable full deep analysis
 python cli.py scan /path/to/code --deep
 
 # Enable adversarial simulation
@@ -502,6 +502,6 @@ This tool is provided "as is" for educational and research purposes. The authors
 
 **Built with 🔒 for the security community**
 
-*BAYREUTHWING v2.0 — Mythos-Class Autonomous Security Intelligence*
+*BAYREUTHWING v2.0 — Autonomous Security Intelligence*
 
 </div>
