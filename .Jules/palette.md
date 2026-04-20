@@ -1,0 +1,3 @@
+## 2026-04-17 - [Static HTML Accessibility]
+**Learning:** Adding semantic HTML (`<main>`, `<section>`, `<header role="banner">`, `<footer role="contentinfo">`) and ARIA properties (`role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-labelledby`, `aria-hidden`) to dynamically generated static HTML security reports makes them screen-reader accessible. Using `text-shadow: 0 1px 2px rgba(0,0,0,0.5);` on light backgrounds improves contrast ratios significantly.
+**Action:** Apply these semantic and ARIA patterns next time a statically generated HTML dashboard or report is built, particularly when charts or diagrams are involved.
