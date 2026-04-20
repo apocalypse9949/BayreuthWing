@@ -1,20 +1,21 @@
 # ═══════════════════════════════════════════════════════════
-# BAYREUTHWING — Model & Scanner Configuration
+# BAYREUTHWING — Model & Scanner Configuration (v2.0)
+# 100M-Parameter Architecture + Full Adaptive Intelligence
 # ═══════════════════════════════════════════════════════════
 
 model:
   name: "CodeTransformer"
-  version: "1.0.0"
+  version: "2.0.0"
 
-  # Architecture
-  vocab_size: 32000
-  max_seq_length: 2048
-  embedding_dim: 512
-  num_heads: 8
-  num_layers: 6
-  feedforward_dim: 2048
+  # Architecture — 100M Parameters
+  vocab_size: 50000
+  max_seq_length: 4096
+  embedding_dim: 768
+  num_heads: 12
+  num_layers: 12
+  feedforward_dim: 3072
   dropout: 0.1
-  num_vulnerability_classes: 11
+  num_vulnerability_classes: 35
   activation: "gelu"
 
   # Token types
@@ -43,7 +44,7 @@ training:
   log_interval: 10
 
   # Data
-  synthetic_samples: 5000
+  synthetic_samples: 10000
   train_split: 0.8
   val_split: 0.1
   test_split: 0.1
@@ -63,6 +64,15 @@ scanner:
     threat_modeling:
       enabled: true
       description: "Models potential attack surfaces and threat vectors"
+    mirofish_execution:
+      enabled: true
+      description: "MiroFish multi-dimensional scenario execution engine"
+    dynamic_rules:
+      enabled: true
+      description: "Hot-loadable dynamic analysis rules"
+    internet_discovery:
+      enabled: false
+      description: "Internet-connected zero-day vulnerability discovery"
 
   # Scanning parameters
   confidence_threshold: 0.5
@@ -75,6 +85,51 @@ scanner:
     auto_detect_framework: true
     auto_detect_language: true
     adjust_rules_by_context: true
+    phase_learning: true
+    pattern_correlation: true
+    target_profiling: true
+    knowledge_graph: true
+
+  # MiroFish execution config
+  mirofish:
+    max_iterations: 10
+    max_scenarios_per_artifact: 25
+    max_scenarios_per_iteration: 200
+    enable_mutations: true
+    enable_compound_detection: true
+    enable_multi_dimensional: true
+    execution_timeout_seconds: 300
+    dimensions:
+      - injection
+      - authentication
+      - cryptography
+      - logic
+      - data_flow
+      - network
+      - supply_chain
+      - serialization
+
+  # Dynamic rules config
+  dynamic_rules:
+    rules_dir: "config/dynamic_rules"
+    auto_disable_threshold: 0.5   # FP rate above this disables the rule
+    auto_promote_threshold: 0.8   # TP rate above this promotes the rule
+    hot_reload: true
+    max_rules: 1000
+
+  # Internet discovery config
+  internet_discovery:
+    enabled: false
+    nvd_api_key: ""
+    github_token: ""
+    search_timeout: 30
+    max_queries_per_scan: 20
+    sources:
+      - nvd
+      - osv
+      - exploitdb
+      - cisa_kev
+      - github_advisories
 
   # Supported languages
   languages:
@@ -87,11 +142,16 @@ scanner:
     - ruby
     - go
     - rust
+    - typescript
+    - kotlin
+    - swift
+    - csharp
 
   # File extensions
   extensions:
     python: [".py"]
-    javascript: [".js", ".jsx", ".ts", ".tsx"]
+    javascript: [".js", ".jsx", ".mjs"]
+    typescript: [".ts", ".tsx"]
     java: [".java"]
     c: [".c", ".h"]
     cpp: [".cpp", ".hpp", ".cc", ".cxx"]
@@ -99,6 +159,9 @@ scanner:
     ruby: [".rb"]
     go: [".go"]
     rust: [".rs"]
+    kotlin: [".kt", ".kts"]
+    swift: [".swift"]
+    csharp: [".cs"]
 
   # Severity scoring weights
   severity:
@@ -114,7 +177,13 @@ report:
   include_recommendations: true
   include_cwe_mapping: true
   include_owasp_mapping: true
+  include_learning_stats: true
+  include_mirofish_report: true
   max_findings_per_file: 50
+
+# ═══════════════════════════════════════════════════════════
+# VULNERABILITY CLASSES — 35 Classes (World Coverage)
+# ═══════════════════════════════════════════════════════════
 
 vulnerability_classes:
   0:
@@ -172,3 +241,123 @@ vulnerability_classes:
     cwe: "CWE-330"
     owasp: "A02:2021"
     severity_base: "medium"
+  11:
+    name: "XML External Entities (XXE)"
+    cwe: "CWE-611"
+    owasp: "A05:2021"
+    severity_base: "high"
+  12:
+    name: "LDAP Injection"
+    cwe: "CWE-90"
+    owasp: "A03:2021"
+    severity_base: "high"
+  13:
+    name: "XPath Injection"
+    cwe: "CWE-643"
+    owasp: "A03:2021"
+    severity_base: "high"
+  14:
+    name: "Server-Side Template Injection (SSTI)"
+    cwe: "CWE-1336"
+    owasp: "A03:2021"
+    severity_base: "critical"
+  15:
+    name: "HTTP Header Injection"
+    cwe: "CWE-113"
+    owasp: "A03:2021"
+    severity_base: "medium"
+  16:
+    name: "CRLF Injection"
+    cwe: "CWE-93"
+    owasp: "A03:2021"
+    severity_base: "medium"
+  17:
+    name: "Log Injection / Forging"
+    cwe: "CWE-117"
+    owasp: "A09:2021"
+    severity_base: "medium"
+  18:
+    name: "Prototype Pollution"
+    cwe: "CWE-1321"
+    owasp: "A08:2021"
+    severity_base: "high"
+  19:
+    name: "Race Condition / TOCTOU"
+    cwe: "CWE-367"
+    owasp: "A04:2021"
+    severity_base: "high"
+  20:
+    name: "Integer Overflow"
+    cwe: "CWE-190"
+    owasp: "A06:2021"
+    severity_base: "high"
+  21:
+    name: "Use After Free"
+    cwe: "CWE-416"
+    owasp: "A06:2021"
+    severity_base: "critical"
+  22:
+    name: "Null Pointer Dereference"
+    cwe: "CWE-476"
+    owasp: "A06:2021"
+    severity_base: "medium"
+  23:
+    name: "Open Redirect"
+    cwe: "CWE-601"
+    owasp: "A01:2021"
+    severity_base: "medium"
+  24:
+    name: "CORS Misconfiguration"
+    cwe: "CWE-942"
+    owasp: "A05:2021"
+    severity_base: "medium"
+  25:
+    name: "JWT Vulnerabilities"
+    cwe: "CWE-347"
+    owasp: "A07:2021"
+    severity_base: "high"
+  26:
+    name: "OAuth / OIDC Misconfiguration"
+    cwe: "CWE-287"
+    owasp: "A07:2021"
+    severity_base: "high"
+  27:
+    name: "Mass Assignment"
+    cwe: "CWE-915"
+    owasp: "A04:2021"
+    severity_base: "high"
+  28:
+    name: "IDOR / BOLA"
+    cwe: "CWE-639"
+    owasp: "A01:2021"
+    severity_base: "high"
+  29:
+    name: "DNS Rebinding"
+    cwe: "CWE-350"
+    owasp: "A10:2021"
+    severity_base: "high"
+  30:
+    name: "Dependency Confusion"
+    cwe: "CWE-427"
+    owasp: "A08:2021"
+    severity_base: "critical"
+  31:
+    name: "ReDoS (Regex DoS)"
+    cwe: "CWE-1333"
+    owasp: "A06:2021"
+    severity_base: "medium"
+  32:
+    name: "Session Fixation"
+    cwe: "CWE-384"
+    owasp: "A07:2021"
+    severity_base: "high"
+  33:
+    name: "Clickjacking"
+    cwe: "CWE-1021"
+    owasp: "A04:2021"
+    severity_base: "medium"
+  34:
+    name: "Insecure File Upload"
+    cwe: "CWE-434"
+    owasp: "A04:2021"
+    severity_base: "high"
