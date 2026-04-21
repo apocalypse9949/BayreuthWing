@@ -1,0 +1,3 @@
+## 2026-04-21 - Custom UI component accessibility
+**Learning:** Custom UI components built with `<div>` and `<span>` elements (like the vulnerability count bar charts) are invisible to screen readers without semantic meaning.
+**Action:** Always add ARIA roles (e.g., `role="progressbar"`) and relevant ARIA state attributes (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-labelledby`, `aria-hidden` on duplicate text) when building non-native visual data representations.
