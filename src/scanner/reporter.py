@@ -230,11 +230,11 @@ class ReportGenerator:
             width = (count / max_count) * 100
             chart_items += f"""
             <div class="chart-row">
-                <span class="chart-label">{name}</span>
-                <div class="chart-bar-container">
+                <span class="chart-label" id="label-{name.replace(' ', '-').lower()}">{name}</span>
+                <div class="chart-bar-container" role="progressbar" aria-valuenow="{count}" aria-valuemin="0" aria-valuemax="{max_count}" aria-labelledby="label-{name.replace(' ', '-').lower()}">
                     <div class="chart-bar" style="width: {width}%;"></div>
                 </div>
-                <span class="chart-value">{count}</span>
+                <span class="chart-value" aria-hidden="true">{count}</span>
             </div>
             """
 
