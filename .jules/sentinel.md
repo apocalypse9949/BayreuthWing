@@ -1,0 +1,4 @@
+## 2025-01-20 - O(N^2) DoS Vulnerability in Regex Line Tracking
+**Vulnerability:** Found multiple instances of O(N^2) DoS vulnerabilities in loop-based line tracking. Code was slicing strings repeatedly with `code[:match.start()].count("\n") + 1`. In loops processing large text inputs this scales poorly, leading to potential Denial of Service.
+**Learning:** While slicing a string for line counting is intuitive, it causes string allocations and counts line breaks starting from index 0 repeatedly. The cost scales quadratically with the length of the string and number of matches.
+**Prevention:** Track the line numbers incrementally. Maintain a `last_idx = 0` and `current_line = 1` variable outside the regex loop. Update these variables incrementally `current_line += code.count("\n", last_idx, match.start())` and `last_idx = match.start()` within the loop.
