@@ -1,0 +1,3 @@
+## 2026-04-23 - Avoid O(N^2) string slicing in regex line counting
+**Learning:** Slicing the entire string from the beginning for every regex match (e.g., `code[:match.start()].count('\n')`) creates an O(N^2) performance bottleneck on large files and can lead to DoS vulnerabilities.
+**Action:** Always track line numbers incrementally by counting newlines between the previous match and the current match (e.g., `code.count('\n', last_idx, match.start())`).
