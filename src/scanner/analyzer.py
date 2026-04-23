@@ -148,8 +148,13 @@ class CodeAnalyzer:
             patterns = []
 
         for pattern, message in patterns:
+            last_idx = 0
+            current_line = 1
             for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
+                # [PERFORMANCE] Use incremental counting to prevent O(N^2) bottleneck
+                current_line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
+                line = current_line
                 imports.append({
                     "line": line,
                     "import": match.group(0),
@@ -167,8 +172,13 @@ class CodeAnalyzer:
             # Escape dots for regex
             escaped = re.escape(func_name)
             pattern = rf"\b{escaped}\s*\("
+            last_idx = 0
+            current_line = 1
             for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
+                # [PERFORMANCE] Use incremental counting to prevent O(N^2) bottleneck
+                current_line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
+                line = current_line
                 findings.append({
                     "function": func_name,
                     "line": line,
@@ -302,8 +312,13 @@ class CodeAnalyzer:
 
         if has_sources:
             for sink_pattern, vuln_class, message in lang_sinks:
+                last_idx = 0
+                current_line = 1
                 for match in re.finditer(sink_pattern, code):
-                    line = code[:match.start()].count("\n") + 1
+                    # [PERFORMANCE] Use incremental counting to prevent O(N^2) bottleneck
+                    current_line += code.count("\n", last_idx, match.start())
+                    last_idx = match.start()
+                    line = current_line
                     risks.append({
                         "vuln_class": vuln_class,
                         "line": line,
