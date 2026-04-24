@@ -231,10 +231,10 @@ class ReportGenerator:
             chart_items += f"""
             <div class="chart-row">
                 <span class="chart-label">{name}</span>
-                <div class="chart-bar-container">
+                <div class="chart-bar-container" role="progressbar" aria-valuenow="{count}" aria-valuemin="0" aria-valuemax="{max_count}" aria-label="{name} vulnerability count">
                     <div class="chart-bar" style="width: {width}%;"></div>
                 </div>
-                <span class="chart-value">{count}</span>
+                <span class="chart-value" aria-hidden="true">{count}</span>
             </div>
             """
 
