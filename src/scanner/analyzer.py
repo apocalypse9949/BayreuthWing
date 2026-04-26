@@ -148,10 +148,13 @@ class CodeAnalyzer:
             patterns = []
 
         for pattern, message in patterns:
+            last_idx = 0
+            current_line = 1
             for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
+                current_line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
                 imports.append({
-                    "line": line,
+                    "line": current_line,
                     "import": match.group(0),
                     "message": message,
                 })
@@ -167,11 +170,14 @@ class CodeAnalyzer:
             # Escape dots for regex
             escaped = re.escape(func_name)
             pattern = rf"\b{escaped}\s*\("
+            last_idx = 0
+            current_line = 1
             for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
+                current_line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
                 findings.append({
                     "function": func_name,
-                    "line": line,
+                    "line": current_line,
                     "vuln_class": info["vuln_class"],
                     "severity": info["severity"],
                     "message": info["msg"],
@@ -302,11 +308,14 @@ class CodeAnalyzer:
 
         if has_sources:
             for sink_pattern, vuln_class, message in lang_sinks:
+                last_idx = 0
+                current_line = 1
                 for match in re.finditer(sink_pattern, code):
-                    line = code[:match.start()].count("\n") + 1
+                    current_line += code.count("\n", last_idx, match.start())
+                    last_idx = match.start()
                     risks.append({
                         "vuln_class": vuln_class,
-                        "line": line,
+                        "line": current_line,
                         "message": message,
                         "severity": "medium",
                         "sink": match.group(0),
