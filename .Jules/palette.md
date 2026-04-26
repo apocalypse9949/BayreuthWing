@@ -1,0 +1,3 @@
+## 2026-04-26 - Accessible Chart Progress Bars and Landmarks in Generated Reports
+**Learning:** HTML-based security reports generated from CLI tools often use `<div>` elements to visually simulate charts or progress bars without structural ARIA roles, rendering them invisible or confusing to screen readers, and often lack main landmark navigation tags.
+**Action:** Always add `role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and `aria-labelledby` to custom visual bar charts, hide duplicate values using `aria-hidden`, and wrap the primary report content in a `<main>` tag to ensure they are correctly interpreted by assistive technologies.
