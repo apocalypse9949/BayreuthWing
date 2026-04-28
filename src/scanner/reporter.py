@@ -229,12 +229,12 @@ class ReportGenerator:
             max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
             chart_items += f"""
-            <div class="chart-row">
-                <span class="chart-label">{name}</span>
-                <div class="chart-bar-container">
+            <div class="chart-row" role="group" aria-label="{name}: {count} occurrences">
+                <span class="chart-label" aria-hidden="true">{name}</span>
+                <div class="chart-bar-container" role="progressbar" aria-valuenow="{count}" aria-valuemin="0" aria-valuemax="{max_count}">
                     <div class="chart-bar" style="width: {width}%;"></div>
                 </div>
-                <span class="chart-value">{count}</span>
+                <span class="chart-value" aria-hidden="true">{count}</span>
             </div>
             """
 
