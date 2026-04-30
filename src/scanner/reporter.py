@@ -225,8 +225,9 @@ class ReportGenerator:
 
         # Build vuln chart data
         chart_items = ""
+        # ⚡ Bolt: Calculate max count once outside the loop to avoid O(N^2) overhead
+        max_count = max(vuln_counts.values()) if vuln_counts else 1
         for name, count in sorted(vuln_counts.items(), key=lambda x: -x[1]):
-            max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
             chart_items += f"""
             <div class="chart-row">
