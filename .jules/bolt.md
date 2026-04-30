@@ -1,0 +1,3 @@
+## 2025-04-30 - O(N²) Anti-Pattern in Reporter
+**Learning:** Found a codebase-specific anti-pattern in HTML report generation where `max()` is repeatedly calculated on the same dictionary values inside a loop. This creates an O(N²) bottleneck when rendering charts for large numbers of unique vulnerabilities.
+**Action:** Always extract invariant aggregations (like `max()`, `sum()`) outside of rendering/chart loops to avoid unnecessary re-computation.
