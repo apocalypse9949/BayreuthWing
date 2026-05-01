@@ -211,11 +211,11 @@ class ReportGenerator:
                 <div class="finding-body">
                     <p class="message">{f['message']}</p>
                     <div class="details">
-                        <span>📄 {f['filepath']}</span>
-                        <span>📍 Line {f.get('line', '?')}</span>
-                        <span>🏷️ {f['cwe_id']}</span>
-                        <span>📋 {f['owasp']}</span>
-                        <span>🔍 {f['source']}</span>
+                        <span title="File path"><span aria-hidden="true">📄</span> {f['filepath']}</span>
+                        <span title="Line number"><span aria-hidden="true">📍</span> Line {f.get('line', '?')}</span>
+                        <span title="CWE identifier"><span aria-hidden="true">🏷️</span> {f['cwe_id']}</span>
+                        <span title="OWASP category"><span aria-hidden="true">📋</span> {f['owasp']}</span>
+                        <span title="Detection source"><span aria-hidden="true">🔍</span> {f['source']}</span>
                     </div>
                     {"<div class='matched-code'><code>" + f['matched_text'][:200] + "</code></div>" if f.get('matched_text') else ""}
                     {"<div class='remediation'><strong>Remediation:</strong><ul>" + "".join(f"<li>{r}</li>" for r in f.get('remediation', [])[:3]) + "</ul></div>" if f.get('remediation') else ""}
