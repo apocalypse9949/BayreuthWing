@@ -96,7 +96,7 @@ class ReportGenerator:
         lines.append(f"  │  🟠 High:      {severity.get('high', 0):>5}                     │")
         lines.append(f"  │  🟡 Medium:    {severity.get('medium', 0):>5}                     │")
         lines.append(f"  │  🔵 Low:       {severity.get('low', 0):>5}                     │")
-        lines.append(f"  │                                         │")
+        lines.append("  │                                         │")
         lines.append(f"  │  Total:       {results.get('total_findings', 0):>5}                     │")
         lines.append("  └─────────────────────────────────────────┘")
         lines.append("")
@@ -225,16 +225,16 @@ class ReportGenerator:
 
         # Build vuln chart data
         chart_items = ""
+        max_count = max(vuln_counts.values()) if vuln_counts else 1
         for name, count in sorted(vuln_counts.items(), key=lambda x: -x[1]):
-            max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
             chart_items += f"""
             <div class="chart-row">
-                <span class="chart-label">{name}</span>
-                <div class="chart-bar-container">
+                <span class="chart-label" aria-hidden="true">{name}</span>
+                <div class="chart-bar-container" role="progressbar" aria-label="{name} vulnerability count" aria-valuenow="{count}" aria-valuemin="0" aria-valuemax="{max_count}">
                     <div class="chart-bar" style="width: {width}%;"></div>
                 </div>
-                <span class="chart-value">{count}</span>
+                <span class="chart-value" aria-hidden="true">{count}</span>
             </div>
             """
 
