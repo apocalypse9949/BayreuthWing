@@ -96,7 +96,7 @@ class ReportGenerator:
         lines.append(f"  │  🟠 High:      {severity.get('high', 0):>5}                     │")
         lines.append(f"  │  🟡 Medium:    {severity.get('medium', 0):>5}                     │")
         lines.append(f"  │  🔵 Low:       {severity.get('low', 0):>5}                     │")
-        lines.append(f"  │                                         │")
+        lines.append("  │                                         │")
         lines.append(f"  │  Total:       {results.get('total_findings', 0):>5}                     │")
         lines.append("  └─────────────────────────────────────────┘")
         lines.append("")
@@ -196,29 +196,49 @@ class ReportGenerator:
         vuln_counts = results.get("vulnerability_counts", {})
 
         # Build findings HTML
+        import html
         findings_html = ""
         for i, f in enumerate(findings):
             color = self.SEVERITY_COLORS.get(f["severity"], "#666")
+
+            # Escape fields to prevent XSS in HTML reports
+            vuln_name = html.escape(str(f.get('vulnerability_name', '')))
+            message = html.escape(str(f.get('message', '')))
+            filepath = html.escape(str(f.get('filepath', '')))
+            cwe_id = html.escape(str(f.get('cwe_id', '')))
+            owasp = html.escape(str(f.get('owasp', '')))
+            source = html.escape(str(f.get('source', '')))
+
+            matched_code_html = ""
+            if f.get('matched_text'):
+                escaped_code = html.escape(f['matched_text'][:200])
+                matched_code_html = f"<div class='matched-code'><code>{escaped_code}</code></div>"
+
+            remediation_html = ""
+            if f.get('remediation'):
+                remedies = "".join(f"<li>{html.escape(str(r))}</li>" for r in f.get('remediation', [])[:3])
+                remediation_html = f"<div class='remediation'><strong>Remediation:</strong><ul>{remedies}</ul></div>"
+
             findings_html += f"""
             <div class="finding" style="border-left: 4px solid {color};">
                 <div class="finding-header">
                     <span class="severity-badge" style="background: {color};">
                         {f['severity'].upper()}
                     </span>
-                    <span class="vuln-name">{f['vulnerability_name']}</span>
+                    <span class="vuln-name">{vuln_name}</span>
                     <span class="confidence">{f['confidence']:.0%} confidence</span>
                 </div>
                 <div class="finding-body">
-                    <p class="message">{f['message']}</p>
+                    <p class="message">{message}</p>
                     <div class="details">
-                        <span>📄 {f['filepath']}</span>
+                        <span>📄 {filepath}</span>
                         <span>📍 Line {f.get('line', '?')}</span>
-                        <span>🏷️ {f['cwe_id']}</span>
-                        <span>📋 {f['owasp']}</span>
-                        <span>🔍 {f['source']}</span>
+                        <span>🏷️ {cwe_id}</span>
+                        <span>📋 {owasp}</span>
+                        <span>🔍 {source}</span>
                     </div>
-                    {"<div class='matched-code'><code>" + f['matched_text'][:200] + "</code></div>" if f.get('matched_text') else ""}
-                    {"<div class='remediation'><strong>Remediation:</strong><ul>" + "".join(f"<li>{r}</li>" for r in f.get('remediation', [])[:3]) + "</ul></div>" if f.get('remediation') else ""}
+                    {matched_code_html}
+                    {remediation_html}
                 </div>
             </div>
             """
