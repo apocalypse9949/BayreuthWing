@@ -96,7 +96,7 @@ class ReportGenerator:
         lines.append(f"  │  🟠 High:      {severity.get('high', 0):>5}                     │")
         lines.append(f"  │  🟡 Medium:    {severity.get('medium', 0):>5}                     │")
         lines.append(f"  │  🔵 Low:       {severity.get('low', 0):>5}                     │")
-        lines.append(f"  │                                         │")
+        lines.append("  │                                         │")
         lines.append(f"  │  Total:       {results.get('total_findings', 0):>5}                     │")
         lines.append("  └─────────────────────────────────────────┘")
         lines.append("")
@@ -225,8 +225,10 @@ class ReportGenerator:
 
         # Build vuln chart data
         chart_items = ""
+        # OPTIMIZATION: Extract invariant max() computation outside the loop
+        # Reduces time complexity from O(N^2) to O(N) where N is number of vulns
+        max_count = max(vuln_counts.values()) if vuln_counts else 1
         for name, count in sorted(vuln_counts.items(), key=lambda x: -x[1]):
-            max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
             chart_items += f"""
             <div class="chart-row">
