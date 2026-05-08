@@ -1,0 +1,3 @@
+## 2024-05-08 - Accessible CSS Bar Charts
+**Learning:** Custom CSS bar charts in HTML reports are invisible to screen readers unless semantic roles and ARIA attributes are explicitly provided.
+**Action:** Always add `role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and a descriptive `aria-label` to custom chart elements, and hide redundant visual text using `aria-hidden="true"`.
