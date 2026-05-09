@@ -7,6 +7,7 @@ Generates scan reports in multiple formats:
 - HTML (styled, interactive)
 """
 
+import html
 import json
 import os
 from datetime import datetime
@@ -96,7 +97,7 @@ class ReportGenerator:
         lines.append(f"  │  🟠 High:      {severity.get('high', 0):>5}                     │")
         lines.append(f"  │  🟡 Medium:    {severity.get('medium', 0):>5}                     │")
         lines.append(f"  │  🔵 Low:       {severity.get('low', 0):>5}                     │")
-        lines.append(f"  │                                         │")
+        lines.append("  │                                         │")
         lines.append(f"  │  Total:       {results.get('total_findings', 0):>5}                     │")
         lines.append("  └─────────────────────────────────────────┘")
         lines.append("")
@@ -199,26 +200,46 @@ class ReportGenerator:
         findings_html = ""
         for i, f in enumerate(findings):
             color = self.SEVERITY_COLORS.get(f["severity"], "#666")
+
+            safe_vuln_name = html.escape(str(f.get('vulnerability_name', '')))
+            safe_message = html.escape(str(f.get('message', '')))
+            safe_filepath = html.escape(str(f.get('filepath', '')))
+            safe_line = html.escape(str(f.get('line', '?')))
+            safe_cwe_id = html.escape(str(f.get('cwe_id', '')))
+            safe_owasp = html.escape(str(f.get('owasp', '')))
+            safe_source = html.escape(str(f.get('source', '')))
+
+            matched_code_html = ""
+            if f.get('matched_text'):
+                safe_matched_text = html.escape(str(f['matched_text'][:200]))
+                matched_code_html = f"<div class='matched-code'><code>{safe_matched_text}</code></div>"
+
+            remediation_html = ""
+            if f.get('remediation'):
+                safe_rems = [html.escape(str(r)) for r in f['remediation'][:3]]
+                rems_list = "".join(f"<li>{r}</li>" for r in safe_rems)
+                remediation_html = f"<div class='remediation'><strong>Remediation:</strong><ul>{rems_list}</ul></div>"
+
             findings_html += f"""
             <div class="finding" style="border-left: 4px solid {color};">
                 <div class="finding-header">
                     <span class="severity-badge" style="background: {color};">
                         {f['severity'].upper()}
                     </span>
-                    <span class="vuln-name">{f['vulnerability_name']}</span>
+                    <span class="vuln-name">{safe_vuln_name}</span>
                     <span class="confidence">{f['confidence']:.0%} confidence</span>
                 </div>
                 <div class="finding-body">
-                    <p class="message">{f['message']}</p>
+                    <p class="message">{safe_message}</p>
                     <div class="details">
-                        <span>📄 {f['filepath']}</span>
-                        <span>📍 Line {f.get('line', '?')}</span>
-                        <span>🏷️ {f['cwe_id']}</span>
-                        <span>📋 {f['owasp']}</span>
-                        <span>🔍 {f['source']}</span>
+                        <span>📄 {safe_filepath}</span>
+                        <span>📍 Line {safe_line}</span>
+                        <span>🏷️ {safe_cwe_id}</span>
+                        <span>📋 {safe_owasp}</span>
+                        <span>🔍 {safe_source}</span>
                     </div>
-                    {"<div class='matched-code'><code>" + f['matched_text'][:200] + "</code></div>" if f.get('matched_text') else ""}
-                    {"<div class='remediation'><strong>Remediation:</strong><ul>" + "".join(f"<li>{r}</li>" for r in f.get('remediation', [])[:3]) + "</ul></div>" if f.get('remediation') else ""}
+                    {matched_code_html}
+                    {remediation_html}
                 </div>
             </div>
             """
@@ -228,9 +249,10 @@ class ReportGenerator:
         for name, count in sorted(vuln_counts.items(), key=lambda x: -x[1]):
             max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
+            safe_name = html.escape(str(name))
             chart_items += f"""
             <div class="chart-row">
-                <span class="chart-label">{name}</span>
+                <span class="chart-label">{safe_name}</span>
                 <div class="chart-bar-container">
                     <div class="chart-bar" style="width: {width}%;"></div>
                 </div>
@@ -238,7 +260,7 @@ class ReportGenerator:
             </div>
             """
 
-        html = f"""<!DOCTYPE html>
+        html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -523,7 +545,7 @@ class ReportGenerator:
             <div class="info-card">
                 <div class="label">Target</div>
                 <div class="value" style="font-size: 1rem; word-break: break-all;">
-                    {results.get('target', 'Unknown')}
+                    {html.escape(str(results.get('target', 'Unknown')))}
                 </div>
             </div>
             <div class="info-card">
@@ -578,6 +600,6 @@ class ReportGenerator:
         if output_path:
             os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
             with open(output_path, "w", encoding="utf-8") as f:
-                f.write(html)
+                f.write(html_content)
 
-        return html
+        return html_content

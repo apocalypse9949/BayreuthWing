@@ -1,0 +1,4 @@
+## 2024-05-14 - Fix XSS Vulnerability in HTML Reporter
+**Vulnerability:** Untrusted user input (like file paths, matched code snippets, or custom vulnerability properties) was directly injected into HTML report templates using f-strings without escaping, allowing for potential Cross-Site Scripting (XSS) when viewing the reports.
+**Learning:** Using basic string formatting or f-strings for HTML generation can inadvertently introduce XSS if the underlying variables stem from parsed files or untrusted sources. Additionally, when using `html.escape()`, one must ensure not to name local variables `html` to prevent shadowing the module.
+**Prevention:** Always sanitize any dynamic string content mapped to HTML templates using an escaping function like `html.escape()` and maintain clear distinctions between local string variables and standard libraries.
