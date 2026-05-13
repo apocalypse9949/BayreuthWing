@@ -1,0 +1,4 @@
+## 2024-05-13 - [HTML Report XSS]
+**Vulnerability:** Untrusted user inputs (like file paths, vulnerability messages, and matched code) were interpolated directly into the HTML scan report in `src/scanner/reporter.py` without escaping.
+**Learning:** Variable interpolation in standard Python strings or f-strings does not provide automatic contextual escaping, leading to XSS vulnerabilities when presenting user-controlled or untrusted data in an HTML context. Shadowing the `html` module by using `html` as a local variable also causes issues when trying to import and use `html.escape()`.
+**Prevention:** Always use `html.escape()` when embedding untrusted strings directly into HTML templates, use templating engines like Jinja2 that auto-escape by default, and never shadow standard library module names with local variables.
