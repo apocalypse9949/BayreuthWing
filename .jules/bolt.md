@@ -1,0 +1,3 @@
+## 2024-05-19 - Extracted Invariant Aggregation in HTML Report
+**Learning:** Found a codebase-specific anti-pattern in the HTML report generator where O(N) invariant aggregations (like `max(vuln_counts.values())`) were repeatedly calculated inside rendering loops, creating an O(N^2) performance bottleneck for scans with many vulnerability types.
+**Action:** Always extract static collection aggregations (`max()`, `sum()`, etc.) outside of rendering loops to prevent quadratic time complexity during report generation.
