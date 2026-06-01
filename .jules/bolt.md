@@ -1,0 +1,3 @@
+## 2024-05-24 - HTML Report Generation O(N^2) Bottleneck
+**Learning:** The HTML report generator can suffer from O(N^2) performance bottlenecks if invariant aggregations like `max()` or `sum()` over static collections (e.g., `vuln_counts.values()`) are placed inside loops.
+**Action:** Always extract and calculate invariant aggregations outside of loops, especially in rendering logic, to ensure O(N) performance.
