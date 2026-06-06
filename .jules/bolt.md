@@ -1,0 +1,3 @@
+## 2026-06-06 - Extracted Invariant from HTML Rendering Loop
+**Learning:** Found an O(N^2) performance bottleneck in `src/scanner/reporter.py` where `max(vuln_counts.values())` was recalculated inside a loop over vulnerability classes. This caused unnecessary overhead for every iteration during HTML report generation.
+**Action:** Always extract invariant aggregations (like `max()` or `sum()`) over static collections outside of loops to maintain O(N) complexity.
