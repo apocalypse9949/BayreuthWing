@@ -20,12 +20,15 @@ class HiddenRouteDetector:
         ]
 
         for pattern, message in patterns:
+            last_idx = 0
+            current_line = 1
             for match in re.finditer(pattern, code, re.IGNORECASE | re.DOTALL):
-                line = code[:match.start()].count("\n") + 1
+                current_line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
                 findings.append({
                      "vuln_class": 9,
                      "severity": "high",
-                     "line": line,
+                     "line": current_line,
                      "message": f"Hidden route/logic detected: {message}",
                      "source": "hidden_route_detection"
                  })
