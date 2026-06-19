@@ -315,16 +315,19 @@ class CodePreprocessor:
             return functions
 
         lines = code.split("\n")
+        last_idx = 0
+        current_line = 1
         for match in re.finditer(pattern, code, re.DOTALL):
             name = next((g for g in match.groups() if g), "unknown")
             start_pos = match.start()
-            start_line = code[:start_pos].count("\n") + 1
+            current_line += code.count("\n", last_idx, start_pos)
+            last_idx = start_pos
 
             functions.append({
                 "name": name,
                 "code": match.group(0),
-                "start_line": start_line,
-                "end_line": start_line + match.group(0).count("\n"),
+                "start_line": current_line,
+                "end_line": current_line + match.group(0).count("\n"),
             })
 
         return functions
