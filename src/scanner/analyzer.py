@@ -148,8 +148,12 @@ class CodeAnalyzer:
             patterns = []
 
         for pattern, message in patterns:
+            # Optimization: Track line incrementally to avoid O(N^2) string slicing
+            last_idx = 0
+            line = 1
             for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
+                line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
                 imports.append({
                     "line": line,
                     "import": match.group(0),
@@ -167,8 +171,12 @@ class CodeAnalyzer:
             # Escape dots for regex
             escaped = re.escape(func_name)
             pattern = rf"\b{escaped}\s*\("
+            # Optimization: Track line incrementally to avoid O(N^2) string slicing
+            last_idx = 0
+            line = 1
             for match in re.finditer(pattern, code):
-                line = code[:match.start()].count("\n") + 1
+                line += code.count("\n", last_idx, match.start())
+                last_idx = match.start()
                 findings.append({
                     "function": func_name,
                     "line": line,
@@ -302,8 +310,12 @@ class CodeAnalyzer:
 
         if has_sources:
             for sink_pattern, vuln_class, message in lang_sinks:
+                # Optimization: Track line incrementally to avoid O(N^2) string slicing
+                last_idx = 0
+                line = 1
                 for match in re.finditer(sink_pattern, code):
-                    line = code[:match.start()].count("\n") + 1
+                    line += code.count("\n", last_idx, match.start())
+                    last_idx = match.start()
                     risks.append({
                         "vuln_class": vuln_class,
                         "line": line,
