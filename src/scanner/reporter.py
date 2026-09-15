@@ -225,8 +225,12 @@ class ReportGenerator:
 
         # Build vuln chart data
         chart_items = ""
+        # ⚡ Bolt: Extract max_count calculation outside the loop.
+        # This resolves an O(N) recalculation per vulnerability class, preventing
+        # unnecessary overhead and potentially O(N^2) complexity in rendering when
+        # scanning large codebases with numerous distinct findings.
+        max_count = max(vuln_counts.values()) if vuln_counts else 1
         for name, count in sorted(vuln_counts.items(), key=lambda x: -x[1]):
-            max_count = max(vuln_counts.values()) if vuln_counts else 1
             width = (count / max_count) * 100
             chart_items += f"""
             <div class="chart-row">
